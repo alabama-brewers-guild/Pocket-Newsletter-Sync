@@ -1,0 +1,2 @@
+<?php
+$pocketConsumerKey = '<your key>';
