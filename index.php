@@ -11,9 +11,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 const NEWLINE = '<br /><br />';
 require('Pocket.php');
-require('GetSourceTitle.php');
 require('config.php');
+require('GetSourceTitle.php');
 
+global $pocketConsumerKey;
 $params = array(
 	'consumerKey' => $pocketConsumerKey
 );

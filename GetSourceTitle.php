@@ -24,6 +24,34 @@ function GetSourceTitle( $url ) {
 		return "KUTV";
 	else if (strpos( $url, 'al.com') !== false)
 		return "al.com";
+	else if (strpos( $url, 'chicagobusiness.com' ) !== false)
+		return "Crain's";
+	else if (strpos( $url, 'ballerstatus.com' ) !== false)
+		return "BallerStatus";
+	else if (strpos( $url, 'yahoo.com' ) !== false)
+		return "Yahoo";
+	else if (strpos( $url, 'nbwa.org' ) !== false)
+		return "NBWA";
+	else if (strpos( $url, 'craftbrewingbusiness.com' ) !== false)
+		return "Craft Brewing Biz";
+	else if (strpos( $url, 'adage.com' ) !== false)
+		return "Ad Age";
+	else if (strpos( $url, 'thefullpint.com' ) !== false)
+		return "The Full Pint";
+	else if (strpos( $url, 'coloradoan' ) !== false)
+		return "Coloradoan";
+	else if (strpos( $url, 'telegraph.co.uk' ) !== false)
+		return "The Telegraph";
+	else if (strpos( $url, 'wsj.com' ) !== false)
+		return "WSJ";
+	else if (strpos( $url, 'bloomberg.com' ) !== false)
+		return "Bloomberg";
+	else if (strpos( $url, 'thrillist.com' ) !== false)
+		return "Thrillist";
+	else if (strpos( $url, 'nacsonline.com' ) !== false)
+		return "NACS";
+	else if (strpos( $url, 'austin360.com' ) !== false)
+		return "Austin360";
 	else
 		return parse_url( $url, PHP_URL_HOST );
 }
