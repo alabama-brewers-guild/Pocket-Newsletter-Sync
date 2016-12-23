@@ -56,6 +56,8 @@ function GetSourceTitle( $url ) {
 		return "USA Today";
 	else if (strpos( $url, 'chicagotribune.com' ) !== false)
 		return "Chicago Tribune";
+	else if (strpos( $url, 'nytimes.com' ) !== false)
+		return "NY Times";
 	else
 		return parse_url( $url, PHP_URL_HOST );
 }
