@@ -52,6 +52,10 @@ function GetSourceTitle( $url ) {
 		return "NACS";
 	else if (strpos( $url, 'austin360.com' ) !== false)
 		return "Austin360";
+	else if (strpos( $url, 'usatoday.com' ) !== false)
+		return "USA Today";
+	else if (strpos( $url, 'chicagotribune.com' ) !== false)
+		return "Chicago Tribune";
 	else
 		return parse_url( $url, PHP_URL_HOST );
 }
