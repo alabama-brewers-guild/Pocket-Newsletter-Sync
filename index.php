@@ -12,57 +12,12 @@ ini_set('display_errors', '1');
 const NEWLINE = '<br /><br />';
 require('Pocket.php');
 require('config.php');
-require('GetSourceTitle.php');
 
-global $pocketConsumerKey;
-$params = array(
-	'consumerKey' => $pocketConsumerKey
-);
-if (empty($params['consumerKey'])) {
-	die('Please fill in your Pocket App Consumer Key');
+function GetSourceTitle( $url ) {
+	return str_replace( 'www.', '', parse_url( $url, PHP_URL_HOST ) );
 }
-$pocket = new Pocket($params);
-if (isset($_GET['authorized'])) {
-	// Convert the requestToken into an accessToken
-	// Note that a requestToken can only be covnerted once
-	// Thus refreshing this page will generate an auth error
-	$user = $pocket->convertToken($_GET['authorized']);
-	/*
-		$user['access_token']	the user's access token for calls to Pocket
-		$user['username']	the user's pocket username
-	*/
-	echo "Access Token: " . $user['access_token'] . '<br />';
-	echo "User: " . $user['username'];
-	echo NEWLINE;
-	
-	// Set the user's access token to be used for all subsequent calls to the Pocket API
-	$pocket->setAccessToken($user['access_token']);
-	// Retrieve the user's list of unread items (limit 5)
-	// http://getpocket.com/developer/docs/v3/retrieve for a list of params
-	$params = array(
-		'sort' => 'oldest',
-		'detailType' => 'simple'
-	);
-	$items = $pocket->retrieve($params, $user['access_token']);
-	if( isset($_GET['delete']) ) {
-		$actions = array();
-		foreach($items['list'] as $id => $item) {
-			$action = array("action" => "archive", "item_id" => $id);
-			$actions[] = $action;
-		}
-		if(count($actions) > 0)
-			$pocket->send( $actions, $user['access_token'] );
-	}
-	foreach($items['list'] as $item)
-	{
-		$source_title = GetSourceTitle( $item['resolved_url'] );
-		echo "<p><a href=\"{$item['resolved_url']}\">{$source_title}</a>: {$item['resolved_title']}</p>";
-	}
-	echo NEWLINE;
-	$delete_prefix = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https' : 'http') . '://'  . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
-	echo "<a href=\"{$delete_prefix}?delete=1\">Clear Pocket Queue</a>";
-}
-else {
+
+function AccessPocketAndRedirect ( $pocket ) {
 	// Attempt to detect the url of the current page to redirect back to
 	// Normally you wouldn't do this
 	$redirect = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https' : 'http') . '://'  . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'] . '?authorized=';
@@ -88,4 +43,63 @@ else {
 	);
 	// END HACK
 	header('Location: ' . $result['redirect_uri']);
+}
+
+global $pocketConsumerKey;
+$params = array(
+	'consumerKey' => $pocketConsumerKey
+);
+if (empty($params['consumerKey'])) {
+	die('Please fill in your Pocket App Consumer Key');
+}
+$pocket = new Pocket($params);
+if (isset($_GET['authorized'])) {
+	try {
+		// Convert the requestToken into an accessToken
+		// Note that a requestToken can only be covnerted once
+		// Thus refreshing this page will generate an auth error
+		$user = $pocket->convertToken($_GET['authorized']);
+		/*
+			$user['access_token']	the user's access token for calls to Pocket
+			$user['username']	the user's pocket username
+		*/
+		echo "Access Token: " . $user['access_token'] . '<br />';
+		echo "User: " . $user['username'];
+		echo NEWLINE;
+		
+		// Set the user's access token to be used for all subsequent calls to the Pocket API
+		$pocket->setAccessToken($user['access_token']);
+		// Retrieve the user's list of unread items (limit 5)
+		// http://getpocket.com/developer/docs/v3/retrieve for a list of params
+		$params = array(
+			'sort' => 'oldest',
+			'detailType' => 'simple'
+		);
+		$items = $pocket->retrieve($params, $user['access_token']);
+		if( isset($_GET['delete']) ) {
+			$actions = array();
+			foreach($items['list'] as $id => $item) {
+				$action = array("action" => "archive", "item_id" => $id);
+				$actions[] = $action;
+			}
+			if(count($actions) > 0)
+				$pocket->send( $actions, $user['access_token'] );
+		}
+		foreach($items['list'] as $item)
+		{
+			$source_title = GetSourceTitle( $item['resolved_url'] );
+			echo "<p><a href=\"{$item['resolved_url']}\">{$source_title}</a>: {$item['resolved_title']}</p>";
+		}
+		echo NEWLINE;
+		$delete_prefix = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) ? 'https' : 'http') . '://'  . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+		echo "<a href=\"{$delete_prefix}?delete=1\">Clear Pocket Queue</a>";
+	}
+	catch (PocketException $e) {
+		$pocket = new Pocket($params);
+		AccessPocketAndRedirect( $pocket );
+	}
+}
+else {
+	$pocket = new Pocket($params);
+	AccessPocketAndRedirect( $pocket );
 }
